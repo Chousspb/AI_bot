@@ -1,3 +1,3 @@
-.env
-ssh_bot
-ssh_bot.pub
+*.env
+*ssh_bot*
+*ssh_bot.pub*
