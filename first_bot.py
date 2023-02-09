@@ -1,20 +1,29 @@
 import logging
-from os import environ as env
-from dotenv import load_dotenv
+from os import environ
+from dotenv import load_dotenv, find_dotenv
 import telebot
 import openai
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.DEBUG)
 
-load_dotenv()
-bot = telebot.TeleBot(env["BOT_API_KEY"])
-openai.api_key = env["OPENAI_API_KEY"]
-user_id = int(env["USER_KEY"])
+load_dotenv(find_dotenv())
+bot = telebot.TeleBot(environ["BOT_API_KEY"])
+openai.api_key = environ["OPENAI_API_KEY"]
+user_id = int(environ["USER_KEY"])
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.send_message(chat_id=message.chat.id, text="Привет, я супер вумный бот! Можешь спросить у меня что хочешь")
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = telebot.types.KeyboardButton("👋 Привет!")
+    btn2 = telebot.types.KeyboardButton("❓ Вопрос?")
+    btn3 = telebot.types.KeyboardButton('СТОП')
+    markup.add(btn1, btn2, btn3)
+    if message.text == 'СТОП':
+        bot.stop_bot()
+    else:
+        bot.send_message(chat_id=message.chat.id, text="Привет, я супер вумный бот! Можешь спросить у меня что хочешь", reply_markup=markup)
+
 
 @bot.message_handler(func=lambda message: True)
 def get_codex(message):
@@ -33,7 +42,5 @@ def get_codex(message):
         )
 
         bot.send_message(message.chat.id, f'\n{response["choices"][0]["text"]}\n')
-
-
 
 bot.infinity_polling()
