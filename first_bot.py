@@ -30,16 +30,16 @@ def get_codex(message):
     if message.text == 'СТОП':
         bot.send_message(chat_id=message.chat.id,
                      text="Всего хорошего! До встречи!")
-        sleep(3)
+        sleep(2)
         bot.stop_polling()
     else:
         response = openai.Completion.create(
             engine="text-davinci-003",
             prompt='"""\n{}\n"""'.format(message.text),
-            temperature=0.3,
-            max_tokens=10,
+            temperature=0,
+            max_tokens=100,
             top_p=1,
-            frequency_penalty=0,
+            frequency_penalty=0.2,
             presence_penalty=0,
             stop=['СТОП']
         )
