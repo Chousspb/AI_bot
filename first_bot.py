@@ -16,8 +16,7 @@ openai.api_key = environ["OPENAI_API_KEY"]
 user_id = environ["USER_KEY"]
 
 
-img_list = os.listdir(r'/Users/Admin/dom_u_morya/sites/bot/photo/')
-img_path = random.choice(img_list)
+
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -31,24 +30,28 @@ def send_welcome(message):
 
 @bot.message_handler(func=lambda message: True)
 def get_codex(message):
+    img_list = os.listdir(r'/Users/Admin/dom_u_morya/sites/bot/photo/')
+    img_path = random.choice(img_list)
+    sent_photo = False
     if message.text == 'Пришли мем':
         bot.send_photo(chat_id=message.chat.id, photo=open('/Users/Admin/dom_u_morya/sites/bot/photo/' + img_path, 'rb'))
-        pass
+        sent_photo = True
     if message.text == 'СТОП':
         bot.send_message(chat_id=message.chat.id,
                      text="Всего хорошего! До встречи!")
         sleep(2)
         bot.stop_polling()
     else:
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt='"""\n{}\n"""'.format(message.text),
-            temperature=0,
-            max_tokens=100,
-            top_p=1,
-            frequency_penalty=0.2,
-            presence_penalty=0,
-            stop=['СТОП']
+        if not sent_photo:
+            response = openai.Completion.create(
+                engine="text-davinci-003",
+                prompt='"""\n{}\n"""'.format(message.text),
+                temperature=0,
+                max_tokens=100,
+                top_p=1,
+                frequency_penalty=0.2,
+                presence_penalty=0,
+                stop=['СТОП']
         )
 
         bot.send_message(message.chat.id, f'\n{response["choices"][0]["text"]}\n')
