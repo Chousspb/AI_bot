@@ -4,6 +4,8 @@ from dotenv import load_dotenv, find_dotenv
 import telebot
 import openai
 from time import sleep
+import random
+import os
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.DEBUG)
@@ -13,11 +15,14 @@ bot = telebot.TeleBot(environ["BOT_API_KEY"])
 openai.api_key = environ["OPENAI_API_KEY"]
 user_id = environ["USER_KEY"]
 
-@bot.message_handler(commands=['start'])
+
+img_list = os.listdir(r'/Users/Admin/dom_u_morya/sites/bot/photo/')
+img_path = random.choice(img_list)
+@bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = telebot.types.KeyboardButton("/start")
-    btn2 = telebot.types.KeyboardButton("👋 Привет!")
+    btn2 = telebot.types.KeyboardButton("Пришли мем")
     btn3 = telebot.types.KeyboardButton('СТОП')
     markup.add(btn1, btn2, btn3)
     bot.send_message(chat_id=message.chat.id,
@@ -26,7 +31,9 @@ def send_welcome(message):
 
 @bot.message_handler(func=lambda message: True)
 def get_codex(message):
-
+    if message.text == 'Пришли мем':
+        bot.send_photo(chat_id=message.chat.id, photo=open('/Users/Admin/dom_u_morya/sites/bot/photo/' + img_path, 'rb'))
+        pass
     if message.text == 'СТОП':
         bot.send_message(chat_id=message.chat.id,
                      text="Всего хорошего! До встречи!")

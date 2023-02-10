@@ -1,3 +1,6 @@
 *.env
 *ssh_bot*
 *ssh_bot.pub*
+*.webp
+*.jpg
+/photo
