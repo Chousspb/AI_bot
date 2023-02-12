@@ -27,33 +27,39 @@ def send_welcome(message):
     bot.send_message(chat_id=message.chat.id,
                      text="Привет, я супер вумный бот! Можешь спросить у меня что хочешь", reply_markup=markup)
 
-
+conversations = {}
 @bot.message_handler(func=lambda message: True)
 def get_codex(message):
-    img_list = os.listdir(r'/Users/Admin/dom_u_morya/sites/bot/photo/')
-    img_path = random.choice(img_list)
+    user_id = message.from_user.id
     sent_photo = False
+    if user_id not in conversations:
+        conversations[user_id] = []
+    conversation = conversations[user_id]
+
     if message.text == 'Пришли мем':
+        img_list = os.listdir(r'/Users/Admin/dom_u_morya/sites/bot/photo/')
+        img_path = random.choice(img_list)
         bot.send_photo(chat_id=message.chat.id, photo=open('/Users/Admin/dom_u_morya/sites/bot/photo/' + img_path, 'rb'))
         sent_photo = True
-    if message.text == 'СТОП':
+    elif message.text == 'СТОП':
         bot.send_message(chat_id=message.chat.id,
                      text="Всего хорошего! До встречи!")
         sleep(2)
         bot.stop_polling()
     else:
-        if not sent_photo:
-            response = openai.Completion.create(
-                engine="text-davinci-003",
-                prompt='"""\n{}\n"""'.format(message.text),
-                temperature=0,
-                max_tokens=100,
-                top_p=1,
-                frequency_penalty=0.2,
-                presence_penalty=0,
-                stop=['СТОП']
+        conversation.append(message.text)
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt='"""\n{}\n"""'.format("\n".join(conversation)),
+            temperature=0.2,
+            max_tokens=200,
+            top_p=1,
+            frequency_penalty=0.2,
+            presence_penalty=0,
+            stop=['СТОП']
         )
-
         bot.send_message(message.chat.id, f'\n{response["choices"][0]["text"]}\n')
+        conversation.append(response["choices"][0]["text"])
+
 
 bot.infinity_polling()
